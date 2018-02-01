@@ -1,10 +1,11 @@
 let fs = require('fs');
 let readline = require('readline');
 let googleAuth = require('google-auth-library');
-
+let path = require('path');
+const opn = require('opn');
 let SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const TOKEN_DIR = __dirname + '/config/'; //the directory where we're going to save the token
-const TOKEN_PATH = TOKEN_DIR + 'sheets.google.token.json'; //the file which will contain the token
+const TOKEN_DIR = path.resolve(__dirname, '../../config/'); //the directory where we're going to save the token
+const TOKEN_PATH = path.resolve(TOKEN_DIR, 'sheets.google.token.json'); //the file which will contain the token
 
 class Authentication {
   authenticate() {
@@ -15,7 +16,7 @@ class Authentication {
     });
   }
   getClientSecret() {
-    return require('./config/credentials.json');
+    return require('../../config/credentials.json');
   }
   authorize(credentials) {
     let clientSecret = credentials.installed.client_secret;
@@ -46,7 +47,8 @@ class Authentication {
         access_type: 'offline',
         scope: SCOPES
       });
-      console.log('Authorize this app by visiting this url: \n ', authUrl);
+      console.log('Opening Authorization Service in Default Browser');
+      opn(authUrl);
       let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -78,6 +80,7 @@ class Authentication {
         throw err;
       } else {
         console.log('Token stored to ' + TOKEN_PATH);
+        process.exit(0);
       }
     });
   }

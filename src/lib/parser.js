@@ -16,6 +16,7 @@ function parseCurrent(filepath) {
   const current = filepath;
   let data = [];
   let headers = ['Description', 'Type', 'Link', 'Status', 'Developed By', 'Tested By', 'Points', 'Demo', 'By', 'Labels'];
+  data.push(headers);
 
   for (issue of current.issues) {
     let developer, tester, demo = '', by = '';
@@ -26,7 +27,7 @@ function parseCurrent(filepath) {
       issue.fields.issuetype.name, // Type
       issue.key, // Link
       issue.fields.status.name, // Status
-      developer, 
+      developer,
       tester,
       issue.fields.customfield_10005, // Story Points
       demo,

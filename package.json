@@ -1,20 +1,24 @@
 {
   "name": "jira-to-sheets",
-  "version": "1.0.3",
+  "version": "1.0.53",
   "description": "small tool for a very specific need",
   "main": "index.js",
   "bin": {
-    "eos": "index.js"
+    "eos": "./src/index.js"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "rimraf": "^2.6.2"
+  },
   "dependencies": {
     "google-auth-library": "0.12.0",
     "googleapis": "24.0.0",
     "inquirer": "^5.0.1",
-    "node-rest-client": "^3.1.0"
+    "node-rest-client": "^3.1.0",
+    "opn": "^5.2.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node ./src/index.js",
+    "prep": "rimraf ./config/sheets.google.token.json"
   },
   "repository": {
     "type": "git",

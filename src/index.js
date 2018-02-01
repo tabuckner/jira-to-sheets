@@ -2,12 +2,12 @@
 
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
-const authentication = require("./authentication");
-const parser = require('./parser');
-const tester = require('./test');
+const authentication = require("./lib/authentication");
+const parser = require('./lib/parser');
+const tester = require('./lib/test');
 const Client = require('node-rest-client').Client;
 let client = new Client();
-const config = require('./config/config');
+const config = require('../config/config');
 
 prompt(config.questions)
   .then(answers => {
@@ -17,7 +17,7 @@ prompt(config.questions)
 function inputHandler(answers) {
   if (answers.initial === false) {
     if (answers.sheetKey.includes('http')) {
-      key = answers.sheetKey.split('/d/');
+      let key = answers.sheetKey.split('/d/');
       answers.sheetKey = key[1].split('/')[0];
     }
     logIn(answers);
@@ -57,7 +57,7 @@ function logIn(answers) {
               "Content-Type": "application/json"
             },
             data: {
-              jql: "project = RT AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10005] DESC"
+              jql: "project = "+ answers.project +" AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10005] DESC"
             }
           }
         },
@@ -69,14 +69,16 @@ function logIn(answers) {
               "Content-Type": "application/json"
             },
             data: {
-              jql: "project = RT AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() ORDER BY cf[10005] DESC"
+              jql: "project = "+ answers.project +" AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() ORDER BY cf[10005] DESC"
             }
           }
         }
       }
-
-      getJiraData(config.searches.current, answers, 'Sheet1');
-      getJiraData(config.searches.future, answers, 'Sheet2');
+      let sheet1, sheet2;
+      answers.tabConfirmation === false ? sheet1 = answers.sheet1 : sheet1 = 'Sheet1';
+      answers.tabConfirmation === false ? sheet2 = answers.sheet2 : sheet2 = 'Sheet2';
+      getJiraData(config.searches.current, answers, sheet1);
+      getJiraData(config.searches.future, answers, sheet2);
 
     } else {
       console.error(response.statusCode, data.errorMessages);
