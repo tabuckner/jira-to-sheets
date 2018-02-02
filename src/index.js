@@ -2,6 +2,11 @@
 
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
+const chalk = require('chalk');
+const log = console.log;
+const success = chalk.bold.green;
+const error = chalk.bold.red;
+const hint = chalk.gray;
 const authentication = require("./lib/authentication");
 const parser = require('./lib/parser');
 const tester = require('./lib/test');
@@ -15,6 +20,7 @@ prompt(config.questions)
   });
 
 function inputHandler(answers) {
+  
   if (answers.initial === false) {
     if (answers.sheetKey.includes('http')) {
       let key = answers.sheetKey.split('/d/');
@@ -23,12 +29,15 @@ function inputHandler(answers) {
     logIn(answers);
   } else {
     authentication.authenticate().then((auth) => {
-      console.log('\nAuthentication saved, please restart the tool.\n');
+      log(success('\nAuthentication saved, ' + success.underline('please restart the tool.') + '\n'));
     });
   }
 }
 
 function logIn(answers) {
+  let jqlProject;
+  answers.project === 'CORE & TBN' ? jqlProject = 'in (CORE, TBN)' : jqlProject = '= ' + answers.project;
+
   config.loginArgs = {
     headers: {
       "Content-Type": "application/json"
@@ -57,7 +66,7 @@ function logIn(answers) {
               "Content-Type": "application/json"
             },
             data: {
-              jql: "project = "+ answers.project +" AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10005] DESC"
+              jql: "project " + jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
             }
           }
         },
@@ -69,7 +78,7 @@ function logIn(answers) {
               "Content-Type": "application/json"
             },
             data: {
-              jql: "project = "+ answers.project +" AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() ORDER BY cf[10005] DESC"
+              jql: "project " + jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
             }
           }
         }
@@ -77,11 +86,18 @@ function logIn(answers) {
       let sheet1, sheet2;
       answers.tabConfirmation === false ? sheet1 = answers.sheet1 : sheet1 = 'Sheet1';
       answers.tabConfirmation === false ? sheet2 = answers.sheet2 : sheet2 = 'Sheet2';
-      getJiraData(config.searches.current, answers, sheet1);
-      getJiraData(config.searches.future, answers, sheet2);
+
+      if (answers.reportType === 'Both') {
+        getJiraData(config.searches.current, answers, sheet1);
+        getJiraData(config.searches.future, answers, sheet2);
+      } else if (answers.reportType === 'PlanITPoker') {
+        getJiraData(config.searches.future, answers, sheet2);
+      } else {
+        getJiraData(config.searches.current, answers, sheet1);
+      }
 
     } else {
-      console.error(response.statusCode, data.errorMessages);
+      console.error(error(response.statusCode, data.errorMessages));
     }
   });
 }

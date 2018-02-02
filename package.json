@@ -1,12 +1,13 @@
 {
   "name": "jira-to-sheets",
-  "version": "1.0.53",
+  "version": "1.0.55",
   "description": "small tool for a very specific need",
   "main": "index.js",
   "bin": {
     "eos": "./src/index.js"
   },
   "devDependencies": {
+    "chalk": "^2.3.0",
     "rimraf": "^2.6.2"
   },
   "dependencies": {

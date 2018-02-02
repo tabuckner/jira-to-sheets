@@ -1,4 +1,8 @@
 let fs = require('fs');
+const chalk = require('chalk');
+const success = chalk.bold.green;
+const error = chalk.bold.red;
+const hint = chalk.gray;
 let readline = require('readline');
 let googleAuth = require('google-auth-library');
 let path = require('path');
@@ -47,7 +51,7 @@ class Authentication {
         access_type: 'offline',
         scope: SCOPES
       });
-      console.log('Opening Authorization Service in Default Browser');
+      console.log(hint('Opening Authorization Service in Default Browser'));
       opn(authUrl);
       let rl = readline.createInterface({
         input: process.stdin,
@@ -57,7 +61,7 @@ class Authentication {
         rl.close();
         oauth2Client.getToken(code, (err, token) => {
           if (err) {
-            console.log('Error while trying to retrieve access token', err);
+            console.log(error('Error while trying to retrieve access token', err));
             reject();
           }
           oauth2Client.credentials = token;
@@ -79,7 +83,7 @@ class Authentication {
       if (err) {
         throw err;
       } else {
-        console.log('Token stored to ' + TOKEN_PATH);
+        console.log(hint('Token stored to ' + TOKEN_PATH));
         process.exit(0);
       }
     });
