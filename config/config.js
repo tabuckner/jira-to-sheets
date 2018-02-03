@@ -24,7 +24,7 @@ module.exports = {
     {
       type: 'list',
       name: 'reportType',
-      message: 'What report are you looking to run? \n(Default: Both)',
+      message: 'What reports? \n(Default: Both)',
       choices: ['Demo Sheet', 'PlanITPoker', 'Both'],
       default: 'Both',
       when: (answers) => {
@@ -38,7 +38,7 @@ module.exports = {
       default: 'Retail',
       choices: ['RT', 'CORE', 'TBN', 'CORE & TBN', 'User Defined'],
       when: (answers) => {
-        return answers.initial === false
+        return answers.initial === false 
       }
     },
     {

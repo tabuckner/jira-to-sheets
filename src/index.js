@@ -14,18 +14,14 @@ const Client = require('node-rest-client').Client;
 let client = new Client();
 const config = require('../config/config');
 
-prompt(config.questions)
-  .then(answers => {
-    inputHandler(answers);
-  });
+prompt(config.questions).then(answers => {
+  inputHandler(answers);
+});
 
 function inputHandler(answers) {
-  
+
   if (answers.initial === false) {
-    if (answers.sheetKey.includes('http')) {
-      let key = answers.sheetKey.split('/d/');
-      answers.sheetKey = key[1].split('/')[0];
-    }
+    answers.sheetKey = cleanURL(answers.sheetKey);
     logIn(answers);
   } else {
     authentication.authenticate().then((auth) => {
@@ -34,10 +30,18 @@ function inputHandler(answers) {
   }
 }
 
-function logIn(answers) {
-  let jqlProject;
-  answers.project === 'CORE & TBN' ? jqlProject = 'in (CORE, TBN)' : jqlProject = '= ' + answers.project;
+function cleanURL(url) {
+  if (url.includes('http')) {
+    let key = url.split('/d/');
+    return key[1].split('/')[0];
+  } else {
+    return url;
+  }
+}
 
+function logIn(answers) { // TODO: Refactor as log in prep and use Async Await to ensure synchronous
+  let jqlProject; // TODO: Move this var to the config.
+  answers.project === 'CORE & TBN' ? jqlProject = 'in (CORE, TBN)' : jqlProject = '= ' + answers.project;
   config.loginArgs = {
     headers: {
       "Content-Type": "application/json"
@@ -83,24 +87,31 @@ function logIn(answers) {
           }
         }
       }
-      let sheet1, sheet2;
+      let sheet1, sheet2; // TODO: Move this to prep for log in 
       answers.tabConfirmation === false ? sheet1 = answers.sheet1 : sheet1 = 'Sheet1';
       answers.tabConfirmation === false ? sheet2 = answers.sheet2 : sheet2 = 'Sheet2';
 
-      if (answers.reportType === 'Both') {
-        getJiraData(config.searches.current, answers, sheet1);
-        getJiraData(config.searches.future, answers, sheet2);
-      } else if (answers.reportType === 'PlanITPoker') {
-        getJiraData(config.searches.future, answers, sheet2);
+      if (answers.operation === 'Update Existing Sheet(s)') {
+        let existing = tester.readFromSheet(sheet1, answers.sheetKey);
+        console.log(existing);
       } else {
-        getJiraData(config.searches.current, answers, sheet1);
+        if (answers.reportType === 'Both') {
+          getJiraData(config.searches.current, answers, sheet1);
+          getJiraData(config.searches.future, answers, sheet2);
+        } else if (answers.reportType === 'PlanITPoker') {
+          getJiraData(config.searches.future, answers, sheet2);
+        } else {
+          getJiraData(config.searches.current, answers, sheet1);
+        }
       }
+
 
     } else {
       console.error(error(response.statusCode, data.errorMessages));
     }
   });
 }
+
 
 function getJiraData(search, answers, sheetName) {
   client.post("https://theappraisallane.atlassian.net/rest/api/latest/search", search.args, function (searchResult, response) {
