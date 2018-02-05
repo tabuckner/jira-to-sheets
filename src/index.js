@@ -19,7 +19,6 @@ prompt(config.questions).then(answers => {
 });
 
 function inputHandler(answers) {
-
   if (answers.initial === false) {
     answers.sheetKey = cleanURL(answers.sheetKey);
     logIn(answers);
@@ -91,19 +90,21 @@ function logIn(answers) { // TODO: Refactor as log in prep and use Async Await t
       answers.tabConfirmation === false ? sheet1 = answers.sheet1 : sheet1 = 'Sheet1';
       answers.tabConfirmation === false ? sheet2 = answers.sheet2 : sheet2 = 'Sheet2';
 
-      if (answers.operation === 'Update Existing Sheet(s)') {
-        let existing = tester.readFromSheet(sheet1, answers.sheetKey);
-        console.log(existing);
-      } else {
+      // if (answers.operation === 'Update Existing Sheet(s)') {
+      //   tester.updateSheet('', sheet1, answers.sheetKey);
+      //   // let testing = tester.updateSheet('', sheet1, answers.sheetKey);
+      //   // console.log(testing);
+      //   // console.log(existing);
+      // } else {
         if (answers.reportType === 'Both') {
-          getJiraData(config.searches.current, answers, sheet1);
-          getJiraData(config.searches.future, answers, sheet2);
+          getJiraData(config.searches.current, answers, sheet1, answers.operation);
+          getJiraData(config.searches.future, answers, sheet2, answers.operation);
         } else if (answers.reportType === 'PlanITPoker') {
-          getJiraData(config.searches.future, answers, sheet2);
+          getJiraData(config.searches.future, answers, sheet2, answers.operation);
         } else {
-          getJiraData(config.searches.current, answers, sheet1);
+          getJiraData(config.searches.current, answers, sheet1, answers.operation);
         }
-      }
+      // }
 
 
     } else {
@@ -112,12 +113,12 @@ function logIn(answers) { // TODO: Refactor as log in prep and use Async Await t
   });
 }
 
-
-function getJiraData(search, answers, sheetName) {
+function getJiraData(search, answers, sheetName, operation) {
   client.post("https://theappraisallane.atlassian.net/rest/api/latest/search", search.args, function (searchResult, response) {
     if (response.statusCode === 200) {
       search.type === 'future' ? uploadData = parser.parseFuture(searchResult) : uploadData = parser.parseCurrent(searchResult);
-      tester.writeToSheet(uploadData, sheetName, answers.sheetKey);
+      operation === 'Update Existing Sheet(s)' ? tester.updateSheet(uploadData, sheetName, answers.sheetKey) : tester.writeToSheet(uploadData, sheetName, answers.sheetKey);
     }
   });
 }
+

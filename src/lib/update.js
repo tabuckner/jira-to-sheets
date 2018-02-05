@@ -1,11 +1,19 @@
-let a = [['a1', 1, 2, 3, 'test', 'my', ''], ['a2', 1, 2, 3, 'test', 'my', ''], ['a3', 1, 2, 3, 'test', 'my', '']];
-let b = [['a3', 4, 5, 6, '', '', 'dong'], ['a2', 4, 5, 6, '', '', 'dong'], ['a1', 4, 5, 6, '', '', 'dong'], ['a4', 4, 5, 6, '', '', 'dong']];
-let c = [];
-
+function updateData(oldData, newData, exceptionArr, keyIndex) {
+  let output = [];
+  let exceptions = invertExceptions(exceptionArr, newData[0].length);
+  let matches = findMatchingRows(oldData, newData, keyIndex);
+  for (let i = 0; i < matches.length; i++) {
+    let updatedRow = updateRow(oldData[matches[i].a], newData[matches[i].b], exceptions); // some sort of bug here. i'm getting repeated rows 10 times (the length of the row array.)
+    output.push(updatedRow);
+  }
+  console.log(output);
+  return newData
+}
 
 function findMatchingRows(arrA, arrB, keyIndex) {
   let matches = [];
   let pair = {};
+  let newRows = 0;
   let strikes = 0;
   let max = arrA.length;
   for (let bIndex = 0; bIndex < arrB.length; bIndex++) {
@@ -18,23 +26,24 @@ function findMatchingRows(arrA, arrB, keyIndex) {
         strikes++;
       }
       if (strikes === max) {
-        console.log('New Row Found', arrB[bIndex]);
+        newRows++;
       }
     }
     strikes = 0;
   }
+  console.log(newRows, 'New Rows Found');
   return matches;
 }
 
 function updateRow(oldRow, newRow, exceptions) {
   for (let i = 0; i < oldRow.length; i++) {
     if (oldRow[i] !== newRow[i] && checkExceptions(exceptions, i) !== true) {
-      // oldRow[i] = newRow[i];
       newRow[i] = oldRow[i];
+      // console.log(newRow[i], 'is now', oldRow[i]);
+      // console.log(newRow);
     }
   }
-  // console.log(oldRow);
-  // console.log(newRow);
+  return newRow;
 }
 
 function invertExceptions(exceptions, numColoumns) {
@@ -42,7 +51,7 @@ function invertExceptions(exceptions, numColoumns) {
   for (let i = 0; i < numColoumns; i++) { // Define 'dummy' array
     trueExceptions.push(i);
   }
-  for (let i = exceptions.length -1; i >= 0; i--) { // Go backwards to avoid losing index context
+  for (let i = exceptions.length - 1; i >= 0; i--) { // Go backwards to avoid losing index context
     trueExceptions.splice(exceptions[i], 1);
   }
   return trueExceptions;
@@ -52,15 +61,6 @@ function checkExceptions(exceptionArr, testVal) {
   return exceptionArr.some(arrVal => testVal === arrVal);
 }
 
-let exceptions = invertExceptions([4,5], 7);
-
-let matches = findMatchingRows(a, b, 0);
-console.log(matches);
-
-
-for (let i = 0; i < matches.length; i++) { // TODO: then append extra data if
-  updateRow(a[matches[i].a], b[matches[i].b], exceptions);
+module.exports = {
+  updateData: updateData
 }
-
-console.log(b); // This is correct. 
-// TODO: Use these formulas to take in the new data; compare to existing and update spreadsheet with diff'd(?) data.
