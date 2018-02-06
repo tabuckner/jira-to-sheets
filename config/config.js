@@ -12,6 +12,23 @@ module.exports = {
       default: false,
     },
     {
+      type: 'input',
+      name: 'atlUser',
+      message: 'Atlassian/Jira username: ',
+      when: (answers) => {
+        return answers.initial === false
+      }
+    },
+    {
+      type: 'password',
+      name: 'atlPassword',
+      mask: '*',
+      message: 'Atlassian/Jira password: ',
+      when: (answers) => {
+        return answers.initial === false
+      }
+    },
+    {
       type: 'list',
       name: 'operation',
       message: 'What opearation are you looking to run? \n(Default: Populate Blank Sheet(s))',
@@ -24,7 +41,7 @@ module.exports = {
     {
       type: 'list',
       name: 'reportType',
-      message: 'What report are you looking to run? \n(Default: Both)',
+      message: 'What reports? \n(Default: Both)',
       choices: ['Demo Sheet', 'PlanITPoker', 'Both'],
       default: 'Both',
       when: (answers) => {
@@ -44,7 +61,7 @@ module.exports = {
     {
       type: 'input',
       name: 'userProject',
-      message: 'Input Jira Project Key',
+      message: 'Jira Project Key (jql)',
       default: null,
       when: (answers) => {
         return answers.project === 'User Defined'
@@ -52,54 +69,48 @@ module.exports = {
     },
     {
       type: 'input',
-      name: 'atlUser',
-      message: 'Your Atlassian/Jira username: ',
+      name: 'keyIndex',
+      message: 'Columns letters for Key Index (shared value): \n(Default: C)',
+      default: 'C',
       when: (answers) => {
-        return answers.initial === false
-      }
-    },
-    {
-      type: 'password',
-      name: 'atlPassword',
-      mask: '*',
-      message: 'Your Atlassian/Jira password: ',
-      when: (answers) => {
-        return answers.initial === false
+        return answers.initial === false && answers.operation === 'Update Existing Sheet(s)' &&
+          (answers.reportType === 'Demo Sheet' || answers.reportType === 'Both')
       }
     },
     {
       type: 'input',
-      name: 'sheetKey',
-      message: 'Google Sheets key or URL',
+      name: 'exceptions',
+      message: 'Columns letters on Demo Sheet excluded from Update separated by columns: \n(Default: H, I)',
+      default: 'H, I',
       when: (answers) => {
-        return answers.initial === false
-      }
-    },
-    {
-      type: 'confirm',
-      name: 'tabConfirmation',
-      message: 'Does your spreadsheet use default sheet names? \n(\'Sheet1\' And/Or \'Sheet2\')',
-      default: true,
-      when: (answers) => {
-        return answers.initial === false
+        return answers.initial === false && answers.operation === 'Update Existing Sheet(s)' &&
+          (answers.reportType === 'Demo Sheet' || answers.reportType === 'Both')
       }
     },
     {
       type: 'input',
       name: 'sheet1',
-      message: 'Enter the name of Sheet/Tab Demo Sheet:',
-      default: null,
+      message: 'Name of Demo Sheet/Tab: \n(Default: Sheet1)',
+      default: 'Sheet1',
       when: (answers) => {
-        return answers.tabConfirmation === false && (answers.reportType === 'Both' || answers.reportType === 'Demo Sheet')
+        return answers.reportType === 'Both' || answers.reportType === 'Demo Sheet'
       }
     },
     {
       type: 'input',
       name: 'sheet2',
-      message: 'Enter the name of PlanITPoker Sheet/Tab:',
-      default: null,
+      message: 'Name of PlanITPoker Sheet/Tab: \n(Default: Sheet2)',
+      default: 'Sheet2',
       when: (answers) => {
-        return answers.tabConfirmation === false && (answers.reportType === 'Both' || answers.reportType === 'PlanITPoker')
+        return answers.reportType === 'Both' || answers.reportType === 'PlanITPoker'
+      }
+    },
+    {
+      type: 'input',
+      name: 'sheetKey',
+      message: 'Google Sheets key or URL:',
+      when: (answers) => {
+        return answers.initial === false
       }
     },
   ],

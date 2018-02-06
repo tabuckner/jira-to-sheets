@@ -9,23 +9,18 @@ const error = chalk.bold.red;
 const hint = chalk.gray;
 const authentication = require("./lib/authentication");
 const parser = require('./lib/parser');
-const tester = require('./lib/test');
+const sheets = require('./lib/sheets');
 const Client = require('node-rest-client').Client;
 let client = new Client();
 const config = require('../config/config');
 
-prompt(config.questions)
-  .then(answers => {
-    inputHandler(answers);
-  });
+prompt(config.questions).then(answers => {
+  inputHandler(answers);
+});
 
 function inputHandler(answers) {
-  
   if (answers.initial === false) {
-    if (answers.sheetKey.includes('http')) {
-      let key = answers.sheetKey.split('/d/');
-      answers.sheetKey = key[1].split('/')[0];
-    }
+    answers.sheetKey = cleanURL(answers.sheetKey);
     logIn(answers);
   } else {
     authentication.authenticate().then((auth) => {
@@ -34,10 +29,18 @@ function inputHandler(answers) {
   }
 }
 
-function logIn(answers) {
-  let jqlProject;
-  answers.project === 'CORE & TBN' ? jqlProject = 'in (CORE, TBN)' : jqlProject = '= ' + answers.project;
+function cleanURL(url) {
+  if (url.includes('http')) {
+    let key = url.split('/d/');
+    return key[1].split('/')[0];
+  } else {
+    return url;
+  }
+}
 
+function logIn(answers) { // TODO: Refactor as log in prep and use Async Await to ensure synchronous
+  config.jqlProject = ''; // TODO: Move this var to the config.
+  answers.project === 'CORE & TBN' ? config.jqlProject = 'in (CORE, TBN)' : config.jqlProject = '= ' + answers.project;
   config.loginArgs = {
     headers: {
       "Content-Type": "application/json"
@@ -53,60 +56,62 @@ function logIn(answers) {
     "password": answers.atlPassword
   }
 
-  // Log In 
   client.post("https://theappraisallane.atlassian.net/rest/auth/1/session", config.loginArgs, function (data, response) {
-    if (response.statusCode == 200) {
-      config.session = data.session;
-      config.searches = {
-        current: {
-          type: 'current',
-          args: {
-            headers: {
-              cookie: config.session.name + '=' + config.session.value, // Set the cookie from the session information
-              "Content-Type": "application/json"
-            },
-            data: {
-              jql: "project " + jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
-            }
-          }
-        },
-        future: {
-          type: 'future',
-          args: {
-            headers: {
-              cookie: config.session.name + '=' + config.session.value,
-              "Content-Type": "application/json"
-            },
-            data: {
-              jql: "project " + jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
-            }
-          }
-        }
-      }
-      let sheet1, sheet2;
-      answers.tabConfirmation === false ? sheet1 = answers.sheet1 : sheet1 = 'Sheet1';
-      answers.tabConfirmation === false ? sheet2 = answers.sheet2 : sheet2 = 'Sheet2';
-
-      if (answers.reportType === 'Both') {
-        getJiraData(config.searches.current, answers, sheet1);
-        getJiraData(config.searches.future, answers, sheet2);
-      } else if (answers.reportType === 'PlanITPoker') {
-        getJiraData(config.searches.future, answers, sheet2);
-      } else {
-        getJiraData(config.searches.current, answers, sheet1);
-      }
-
+    if (response.statusCode == 200) { // TODO: Move all of this to a new organized response hanlder function
+      saveCookie(data.session);
+      reportLogic(answers);
     } else {
       console.error(error(response.statusCode, data.errorMessages));
     }
   });
 }
 
-function getJiraData(search, answers, sheetName) {
+function getJiraData(search, answers, sheetName, operation) {
   client.post("https://theappraisallane.atlassian.net/rest/api/latest/search", search.args, function (searchResult, response) {
     if (response.statusCode === 200) {
       search.type === 'future' ? uploadData = parser.parseFuture(searchResult) : uploadData = parser.parseCurrent(searchResult);
-      tester.writeToSheet(uploadData, sheetName, answers.sheetKey);
+      operation === 'Update Existing Sheet(s)' ? sheets.updateSheet(uploadData, sheetName, answers.sheetKey, answers.exceptions, answers.keyIndex) : sheets.writeToSheet(uploadData, sheetName, answers.sheetKey);
     }
   });
+}
+
+function reportLogic(answers) {
+  if (answers.reportType === 'Both') {
+    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation);
+    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation);
+  } else if (answers.reportType === 'PlanITPoker') {
+    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation);
+  } else {
+    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation);
+  }
+}
+
+function saveCookie(cookie) {
+  config.session = cookie;
+  config.searches = {
+    current: {
+      type: 'current',
+      args: {
+        headers: {
+          cookie: config.session.name + '=' + config.session.value, // Set the cookie from the session information
+          "Content-Type": "application/json"
+        },
+        data: {
+          jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
+        }
+      }
+    },
+    future: {
+      type: 'future',
+      args: {
+        headers: {
+          cookie: config.session.name + '=' + config.session.value,
+          "Content-Type": "application/json"
+        },
+        data: {
+          jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
+        }
+      }
+    }
+  }
 }
