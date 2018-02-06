@@ -3,7 +3,10 @@ function colToindex(string) {
   string = string.toUpperCase().replace(/\s/g,'');
   let cols = string.split(',');
   for (col of cols) {
+<<<<<<< HEAD
+=======
     // console.log(lettersToNumber(col));
+>>>>>>> master
     indeces.push(lettersToNumber(col));
   }
   return(indeces);

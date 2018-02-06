@@ -1,6 +1,10 @@
 {
   "name": "jira-to-sheets",
+<<<<<<< HEAD
+  "version": "1.0.56",
+=======
   "version": "1.0.562",
+>>>>>>> master
   "description": "small tool for a very specific need",
   "main": "index.js",
   "bin": {
