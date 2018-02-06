@@ -58,7 +58,11 @@ function logIn(answers) { // TODO: Refactor as log in prep and use Async Await t
 
   client.post("https://theappraisallane.atlassian.net/rest/auth/1/session", config.loginArgs, function (data, response) {
     if (response.statusCode == 200) { // TODO: Move all of this to a new organized response hanlder function
+<<<<<<< HEAD
       saveCookie(data.session, answers.isTalEmployee);
+=======
+      saveCookie(data.session);
+>>>>>>> master
       reportLogic(answers);
     } else {
       console.error(error(response.statusCode, data.errorMessages));
@@ -86,7 +90,11 @@ function reportLogic(answers) {
   }
 }
 
+<<<<<<< HEAD
 function saveCookie(cookie, isTALEmployee) {
+=======
+function saveCookie(cookie) {
+>>>>>>> master
   config.session = cookie;
   config.searches = {
     current: {
@@ -96,10 +104,16 @@ function saveCookie(cookie, isTALEmployee) {
           cookie: config.session.name + '=' + config.session.value, // Set the cookie from the session information
           "Content-Type": "application/json"
         },
+<<<<<<< HEAD
         data: {}
         // {
         //   jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
         // }
+=======
+        data: {
+          jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
+        }
+>>>>>>> master
       }
     },
     future: {
@@ -109,6 +123,7 @@ function saveCookie(cookie, isTALEmployee) {
           cookie: config.session.name + '=' + config.session.value,
           "Content-Type": "application/json"
         },
+<<<<<<< HEAD
         data: {}
         // {
         //   jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
@@ -132,4 +147,12 @@ function saveCookie(cookie, isTALEmployee) {
     }
   }
   console.log(config.searches.current.args.data, config.searches.future.args.data);
+=======
+        data: {
+          jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
+        }
+      }
+    }
+  }
+>>>>>>> master
 }
