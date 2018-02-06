@@ -7,15 +7,18 @@ const log = console.log;
 const success = chalk.bold.green;
 const error = chalk.bold.red;
 const hint = chalk.gray;
+const tal = chalk.hex('#61ae7d');
 const authentication = require("./lib/authentication");
 const parser = require('./lib/parser');
 const sheets = require('./lib/sheets');
+const talImg = require('./lib/tal');
 const Client = require('node-rest-client').Client;
 let client = new Client();
 const config = require('../config/config');
 
 prompt(config.questions).then(answers => {
   inputHandler(answers);
+  console.log(tal(talImg.tal));
 });
 
 function inputHandler(answers) {
@@ -125,5 +128,4 @@ function saveCookie(cookie, isTALEmployee) {
       jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints()"
     }
   }
-  console.log(config.searches.current.args.data, config.searches.future.args.data);
 }

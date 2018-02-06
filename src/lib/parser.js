@@ -11,7 +11,6 @@ function parseFuture(filepath) {
   return futureData;
 }
 
-
 function parseCurrent(filepath) {
   const current = filepath;
   let data = [];
