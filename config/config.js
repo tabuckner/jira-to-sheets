@@ -12,6 +12,15 @@ module.exports = {
       default: false,
     },
     {
+      type: 'confirm',
+      name: 'isTalEmployee',
+      message: 'Is Dan Crushing it? \n(Default: No)',
+      default: false,
+      when: (answers) => {
+        return answers.initial === false
+      }
+    },
+    {
       type: 'input',
       name: 'atlUser',
       message: 'Atlassian/Jira username: ',
