@@ -1,10 +1,10 @@
 const google = require('googleapis');
+const chalk = require('chalk');
 const authentication = require("./authentication");
 const updater = require('./update');
+const helpers = require('./helpers');
 const sheets = google.sheets('v4');
-// let testRow = ['Typo in the menu("Arbitrations")', 'Bug', 'CORE-438', 'To Build', '', 'edashkovsky', '', '', '', 'iOS']
 
-// updateSheet(testRow, 'Sheet1', '1bkeKHp4pA4-nzf2oZktIdS_CDIcl_FGXpZd0THtJooY');
 
 function writeToSheet(data, sheet, key) {
   authentication.authenticate().then((auth) => {
@@ -12,20 +12,20 @@ function writeToSheet(data, sheet, key) {
   });
 }
 
-function updateSheet(data, sheet, key) {
-  // hardcoded params for testing
-  testExceptions = [7, 8]; // TODO: Write new question
-  testKeyIndex = 3; // TODO: Write new question
-  console.log('New Data Length', data.length); // we have
-
+function updateSheet(data, sheet, key, exceptionStr, keyIndexStr) { // TODO: Add support for Destructive and Non-Destructive updates (separate sheet).
+  let exceptions = helpers.colToindex(exceptionStr);
+  let keyIndex = helpers.colToindex(keyIndexStr); // TODO: Move this to a question for more exn
+  console.log(chalk.gray.underline('New Data Length:'), data.length); // we have
   authentication.authenticate().then((auth) => {
     readSheet(auth, sheet, key)
       .then(existing => {
-        console.log('Existing Data Length', existing.length);
-        let updatedData = updater.updateData(existing, data, testExceptions, testKeyIndex); // function updateData(oldData, newData, exceptionArr, keyIndex)
-        console.log('Updated Data Length', updatedData.length);
-        clearSheet(auth, 'Sheet2', key); // function clearSheet(auth, sheet, key)
-        writeSheet(auth, updatedData, 'Sheet2', key);
+        console.log(chalk.gray.underline('Existing Data Length:'), existing.length);
+        let updatedDataSet = updater.updateData(existing, data, exceptions, keyIndex); // function updateData(oldData, newData, exceptionArr, keyIndex)
+        let updatedData = updatedDataSet.output;
+        console.log(chalk.gray.underline('New Rows Found:'), updatedDataSet.newRows);
+        console.log(chalk.green.underline('Updated Data Length:'), updatedData.length);
+        clearSheet(auth, sheet, key); // function clearSheet(auth, sheet, key)
+        writeSheet(auth, updatedData, sheet, key);
       });
   });
 }
@@ -40,7 +40,7 @@ function clearSheet(auth, sheet, key) {
     if (err) {
       console.error(err);
     } else {
-      console.log(sheet, 'Cleared');
+      console.log(chalk.gray(sheet, 'Cleared'));
     }
   });
 }
@@ -59,7 +59,7 @@ function writeSheet(auth, data, sheet, key) {
     if (err) {
       console.error(err);
     } else {
-      console.log(sheet, "Appended");
+      console.log(chalk.green(sheet, "Appended"));
     }
   });
 }

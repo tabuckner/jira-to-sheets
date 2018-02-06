@@ -1,17 +1,23 @@
 function updateData(oldData, newData, exceptionArr, keyIndex) {
-  let output = [];
+  let rowInfo = findMatchingRows(oldData, newData, keyIndex);
+  let data = {
+    output: [],
+    newRows: rowInfo.newRows
+  }
   let exceptions = invertExceptions(exceptionArr, newData[0].length);
-  let matches = findMatchingRows(oldData, newData, keyIndex);
+  let matches = rowInfo.matches;
   for (let i = 0; i < matches.length; i++) {
     let updatedRow = updateRow(oldData[matches[i].a], newData[matches[i].b], exceptions); // some sort of bug here. i'm getting repeated rows 10 times (the length of the row array.)
-    output.push(updatedRow);
+    data.output.push(updatedRow);
   }
-  console.log(output);
-  return newData
+  return data
 }
 
 function findMatchingRows(arrA, arrB, keyIndex) {
-  let matches = [];
+  let data = {
+    matches: [],
+    newRows: 0
+  }
   let pair = {};
   let newRows = 0;
   let strikes = 0;
@@ -21,26 +27,23 @@ function findMatchingRows(arrA, arrB, keyIndex) {
     for (let aIndex = 0; aIndex < arrA.length; aIndex++) {
       if (arrA[aIndex][keyIndex] === arrB[bIndex][keyIndex]) {
         pair = { b: bIndex, a: aIndex };
-        matches.push(pair);
+        data.matches.push(pair);
       } else {
         strikes++;
       }
       if (strikes === max) {
-        newRows++;
+        data.newRows++;
       }
     }
     strikes = 0;
   }
-  console.log(newRows, 'New Rows Found');
-  return matches;
+  return data;
 }
 
 function updateRow(oldRow, newRow, exceptions) {
   for (let i = 0; i < oldRow.length; i++) {
     if (oldRow[i] !== newRow[i] && checkExceptions(exceptions, i) !== true) {
       newRow[i] = oldRow[i];
-      // console.log(newRow[i], 'is now', oldRow[i]);
-      // console.log(newRow);
     }
   }
   return newRow;
