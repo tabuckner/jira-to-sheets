@@ -2,6 +2,8 @@
 
 _A very simple tool, for a very specific need._
 
+Originally designed for use by members of my organization. If you don't see my ugly mug on a daily basis, Dan is not crushing it, and you should see [this section](#outside-of-our-organization) below.
+
 Intended to be installed as a CLI, this tool might help those of us who are interested in automating some of the boring work for preparing regular scrum demos/retrospective meetings.
 
 The tool uses Jira's authentication api to store a cookie locally and query your Jira organization for data regarding a given project's current sprint, and upcoming sprint. 
@@ -65,6 +67,22 @@ Subsequent executions
 <sudo> eos
 ```
 
+### Outside-of-Our-Organization
+**When you see this prompt:**
+```
+? Is Dan Crushing it?
+(Default: No) No
+```
+
+Simply answer the default no as shown above. This will remove any custom fields from the Jira query and help prevent errors or unwanted data.
+
+**When you see this prompt:**
+```
+? Jira Project Key (jql) CORE, TBN
+```
+
+Simply input the Jira Project Key(s) separated by commas (where applicable) as shown above. 
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
@@ -75,5 +93,5 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License
 

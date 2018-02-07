@@ -15,15 +15,15 @@ function writeToSheet(data, sheet, key) {
 function updateSheet(data, sheet, key, exceptionStr, keyIndexStr) { // TODO: Add support for Destructive and Non-Destructive updates (separate sheet).
   let exceptions = helpers.colToindex(exceptionStr);
   let keyIndex = helpers.colToindex(keyIndexStr); // TODO: Move this to a question for more exn
-  console.log(chalk.gray.underline('New Data Length:'), data.length); // we have
+  console.log(chalk.gray.underline('New Data Length:', data.length)); // we have
   authentication.authenticate().then((auth) => {
     readSheet(auth, sheet, key)
       .then(existing => {
-        console.log(chalk.gray.underline('Existing Data Length:'), existing.length);
+        console.log(chalk.gray.underline('Existing Data Length:', existing.length));
         let updatedDataSet = updater.updateData(existing, data, exceptions, keyIndex); // function updateData(oldData, newData, exceptionArr, keyIndex)
         let updatedData = updatedDataSet.output;
-        console.log(chalk.gray.underline('New Rows Found:'), updatedDataSet.newRows);
-        console.log(chalk.green.underline('Updated Data Length:'), updatedData.length);
+        console.log(chalk.gray.underline('New Rows Found:', updatedDataSet.newRows));
+        console.log(chalk.green.underline('Updated Data Length:', updatedData.length));
         clearSheet(auth, sheet, key); // function clearSheet(auth, sheet, key)
         writeSheet(auth, updatedData, sheet, key);
       });
