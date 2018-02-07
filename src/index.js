@@ -40,7 +40,7 @@ function cleanURL(url) {
 
 function logIn(answers) { // TODO: Refactor as log in prep and use Async Await to ensure synchronous
   config.jqlProject = ''; // TODO: Move this var to the config.
-  answers.project === 'CORE & TBN' ? config.jqlProject = 'in (CORE, TBN)' : config.jqlProject = '= ' + answers.project;
+  answers.project === 'CORE & TBN' ? config.jqlProject = 'CORE, TBN' : (answers.project === 'User Defined' ? config.jqlProject = answers.userProject : config.jqlProject = answers.project);
   config.loginArgs = {
     headers: {
       "Content-Type": "application/json"
@@ -112,18 +112,17 @@ function saveCookie(cookie, isTALEmployee) {
   }
   if (isTALEmployee) {
     config.searches.current.args.data = {
-      jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
+      jql: "project in (" + config.jqlProject + ") AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
     };
     config.searches.future.args.data = {
-      jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
+      jql: "project in (" + config.jqlProject + ") AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints() AND \"Story Points\" = null ORDER BY cf[10012] ASC"
     }
   } else {
     config.searches.current.args.data = {
-      jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in openSprints()"
+      jql: "project in (" + config.jqlProject + ") AND issuetype in (Bug, Story, Task) AND Sprint in openSprints()"
     };
     config.searches.future.args.data = {
-      jql: "project " + config.jqlProject + " AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints()"
+      jql: "project in (" + config.jqlProject + ") AND issuetype in (Bug, Story, Task) AND Sprint in futureSprints()"
     }
   }
-  console.log(config.searches.current.args.data, config.searches.future.args.data);
 }
