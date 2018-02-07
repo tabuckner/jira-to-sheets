@@ -111,7 +111,7 @@ function saveCookie(cookie, isTALEmployee) {
     }
   }
   if (isTALEmployee) {
-    config.searches.current.args.data = 
+    config.searches.current.args.data = {
       jql: "project in (" + config.jqlProject + ") AND issuetype in (Bug, Story, Task) AND Sprint in openSprints() ORDER BY cf[10012] ASC"
     };
     config.searches.future.args.data = {

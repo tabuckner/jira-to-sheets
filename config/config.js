@@ -61,7 +61,7 @@ module.exports = {
       type: 'list',
       name: 'project',
       message: 'Select the Jira Project',
-      default: 'Retail',
+      default: 'User Defined',
       choices: ['RT', 'CORE', 'TBN', 'CORE & TBN', 'User Defined'],
       when: (answers) => {
         return answers.initial === false
