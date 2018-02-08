@@ -130,8 +130,8 @@ Update clears sheet prior to bringing in new data, Populate appends to whatever 
   PlanITPoker
 ❯ Both
 ```
-Demo Sheet example may be found [here]()
-PlanITPoker example may be found [here](#)
+Demo Sheet example may be found [here](#demo-report)
+PlanITPoker example may be found [here](#PlanITPoker)
 
 ### Jira Project(s)
 ```
