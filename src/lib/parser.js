@@ -3,7 +3,7 @@ function parseFuture(filepath) {
   const future = filepath;
   const issues = [];
   for (issue of future.issues) {
-    let card = '[' + issue.key + ']' + ' - ' + issue.fields.summary;
+    let card = '[' + issue.key + ']' + ' - ' + issue.fields.summary + ' (' + issue.fields.issuetype.name + ')';
     issues.push(card);
     let row = [card];
     futureData.push(row);
@@ -19,9 +19,10 @@ function parseCurrent(filepath) {
   data.push(headers);
 
   for (issue of current.issues) {
-    let developer, tester, demo = '', by = '';
-    issue.fields.customfield_11200 ? developer = issue.fields.customfield_11200.name : developer = ''; // TODO: confirm this is correct selector
-    issue.fields.customfield_10900 ? tester = issue.fields.customfield_10900.name : tester = ''; // TODO: confirm this is correct selector
+    let developer, tester, demo = '', by = '', storyPoints;
+    issue.fields.customfield_11200 ? developer = issue.fields.customfield_11200.name : developer = '';
+    issue.fields.customfield_10900 ? tester = issue.fields.customfield_10900.name : tester = ''; 
+    issue.fields.customfield_10005 ? storyPoints = issue.fields.customfield_10005 : storyPoints = '';
     let row = [
       issue.fields.summary, // Description
       issue.fields.issuetype.name, // Type
@@ -29,7 +30,7 @@ function parseCurrent(filepath) {
       issue.fields.status.name, // Status
       developer,
       tester,
-      issue.fields.customfield_10005, // Story Points
+      storyPoints, // Story Points
       demo,
       by,
       issue.fields.labels.join(', '), // Labels
