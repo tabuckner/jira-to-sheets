@@ -39,22 +39,22 @@ module.exports = {
     },
     {
       type: 'list',
-      name: 'operation',
-      message: 'What opearation are you looking to run? \n(Default: Populate Blank Sheet(s))',
-      choices: ['Populate Blank Sheet(s)', 'Update Existing Sheet(s)'],
-      default: 'Populate Blank Sheets(s)',
-      when: (answers) => {
-        return answers.initial === false
-      }
-    },
-    {
-      type: 'list',
       name: 'reportType',
       message: 'What reports? \n(Default: Both)',
       choices: ['Demo Sheet', 'PlanITPoker', 'Both'],
       default: 'Both',
       when: (answers) => {
         return answers.initial === false
+      }
+    },
+    {
+      type: 'list',
+      name: 'operation',
+      message: 'What opearation are you looking to run? \n(Default: Populate Blank Sheet(s))',
+      choices: ['Populate Blank Sheet(s)', 'Update Existing Sheet(s)'],
+      default: 'Populate Blank Sheets(s)',
+      when: (answers) => {
+        return answers.initial === false && answers.reportType !== 'PlanITPoker'
       }
     },
     {
