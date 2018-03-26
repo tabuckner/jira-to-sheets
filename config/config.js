@@ -1,7 +1,7 @@
 module.exports = {
   default: {
-    user: '<yourdefaultuser>',
-    pass: '<yourdefaultpass>'
+    user: '<yourdefaultuser>', // TODO: Test if we can remove this garbage.
+    pass: '<yourdefaultpass>' // TODO: Test if we can remove this garbage.
   },
   project: null,
   questions: [
@@ -21,20 +21,38 @@ module.exports = {
       }
     },
     {
+      type: 'confirm',
+      name: 'storeLocal',
+      message: 'Would you like to store your Google OAuth token Locally?\nNOTE: This can present security risks. \n(Default: No)',
+      default: false,
+      when: (answers) => {
+        return answers.initial === true
+      }
+    },
+    {
+      type: 'confirm',
+      name: 'storeAtlLocal',
+      message: 'Would you like to store your Atlassian credentials Locally?\nNOTE: This can present security risks. \n(Default: No)',
+      default: false,
+      when: (answers) => {
+        return answers.initial === true
+      }
+    },
+    {
       type: 'input',
       name: 'atlUser',
-      message: 'Atlassian/Jira username: ',
+      message: 'Atlassian/Jira username:\n(Leave Blank if Saved)',
       when: (answers) => {
-        return answers.initial === false
+        return answers.initial === false || answers.storeAtlLocal === true
       }
     },
     {
       type: 'password',
       name: 'atlPassword',
       mask: '*',
-      message: 'Atlassian/Jira password: ',
+      message: 'Atlassian/Jira password:\n(Leave Blank if Saved)',
       when: (answers) => {
-        return answers.initial === false
+        return answers.initial === false || answers.storeAtlLocal === true
       }
     },
     {
@@ -42,7 +60,7 @@ module.exports = {
       name: 'reportType',
       message: 'What reports? \n(Default: Both)',
       choices: ['Demo Sheet', 'PlanITPoker', 'Both'],
-      default: 'Both',
+      default: 'Demo Sheet',
       when: (answers) => {
         return answers.initial === false
       }

@@ -1,6 +1,6 @@
 {
   "name": "jira-to-sheets",
-  "version": "1.0.587",
+  "version": "1.0.59",
   "description": "small tool for a very specific need",
   "main": "index.js",
   "bin": {
@@ -15,7 +15,8 @@
     "googleapis": "24.0.0",
     "inquirer": "^5.0.1",
     "node-rest-client": "^3.1.0",
-    "opn": "^5.2.0"
+    "opn": "^5.2.0",
+    "simple-encryptor": "^1.2.0"
   },
   "scripts": {
     "start": "node ./src/index.js",

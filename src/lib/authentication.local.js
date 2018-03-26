@@ -1,4 +1,5 @@
-let fs = require('fs');
+const fs = require('fs');
+const os = require('os');
 const chalk = require('chalk');
 const success = chalk.bold.green;
 const error = chalk.bold.red;
@@ -8,10 +9,11 @@ let googleAuth = require('google-auth-library');
 let path = require('path');
 const opn = require('opn');
 let SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const TOKEN_DIR = path.resolve(__dirname, '../../config/'); //the directory where we're going to save the token
+const TOKEN_DIR = `${os.homedir()}/.j2s`; // Updated 3/22 for locally stored tokens
+// // const TOKEN_DIR = path.resolve(__dirname, '../../config/'); //the directory where we're going to save the token
 const TOKEN_PATH = path.resolve(TOKEN_DIR, 'sheets.google.token.json'); //the file which will contain the token
 
-class Authentication {
+class AuthenticationLocal {
   authenticate() {
     return new Promise((resolve, reject) => {
       let credentials = this.getClientSecret();
@@ -84,10 +86,10 @@ class Authentication {
         throw err;
       } else {
         console.log(hint('Token stored to ' + TOKEN_PATH));
-        process.exit(0); // TODO: Move this to main logic file to prevent user from restarting tool. 
+        // process.exit(0); // TODO: Move this to main logic file to prevent user from restarting tool. 
       }
     });
   }
 }
 
-module.exports = new Authentication();
+module.exports = new AuthenticationLocal();

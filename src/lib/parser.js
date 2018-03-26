@@ -20,8 +20,8 @@ function parseCurrent(filepath) {
 
   for (issue of current.issues) {
     let developer, tester, demo = '', by = '', storyPoints;
-    issue.fields.customfield_11200 ? developer = issue.fields.customfield_11200.name : developer = '';
-    issue.fields.customfield_10900 ? tester = issue.fields.customfield_10900.name : tester = ''; 
+    issue.fields.customfield_11200 ? tester = issue.fields.customfield_11200.name : tester = '';
+    issue.fields.customfield_10900 ? developer = issue.fields.customfield_10900.name : developer = ''; 
     issue.fields.customfield_10005 ? storyPoints = issue.fields.customfield_10005 : storyPoints = '';
     let row = [
       issue.fields.summary, // Description

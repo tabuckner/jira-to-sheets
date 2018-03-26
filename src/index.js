@@ -3,11 +3,14 @@
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
 const chalk = require('chalk');
+const fs = require('fs');
 const log = console.log;
 const success = chalk.bold.green;
 const error = chalk.bold.red;
 const hint = chalk.gray;
 const authentication = require("./lib/authentication");
+const authenticationLocal = require("./lib/authentication.local");
+const atlassianCredsLocal = require('./lib/atlassian');
 const parser = require('./lib/parser');
 const sheets = require('./lib/sheets');
 const Client = require('node-rest-client').Client;
@@ -23,9 +26,24 @@ function inputHandler(answers) {
     answers.sheetKey = cleanURL(answers.sheetKey);
     logIn(answers);
   } else {
-    authentication.authenticate().then((auth) => {
-      log(success('\nAuthentication saved, ' + success.underline('please restart the tool.') + '\n'));
-    });
+    if (answers.storeLocal && answers.storeAtlLocal) {
+      authenticationLocal.authenticate().then((auth) => {
+        log(success('\nAuthentication and Atlassian Credentials saved ' + success.underline('Locally') + '\n' + success.underline('please restart the tool.') + '\n'));
+        setTimeout(() => {
+          atlassianCredsLocal.storeCreds(answers.atlUser, answers.atlPassword);
+        },1000);
+      })
+    } else if (answers.storeLocal && !answers.storeAtlLocal) {
+      authenticationLocal.authenticate().then((auth) => {
+        log(success('\nAuthentication saved ' + success.underline('Locally') + '\n' + success.underline('please restart the tool.') + '\n'));
+      })
+    } else if (!answers.storeLocal && answers.storeAtlLocal) {
+      atlassianCredsLocal.storeCreds(answers.atlUser, answers.atlPassword);
+    } else {
+      authentication.authenticate().then((auth) => {
+        log(success('\nAuthentication saved, ' + success.underline('please restart the tool.') + '\n'));
+      });
+    }
   }
 }
 
@@ -47,42 +65,51 @@ function logIn(answers) { // TODO: Refactor as log in prep and use Async Await t
     },
     data: {}
   }
-  if (config.default.user && answers.atlUser !== config.default.user) {
-    config.loginArgs.data.username = answers.atlUser;
-    config.loginArgs.data.password = answers.atlPassword;
-  }
-  config.loginArgs.data = {
-    "username": answers.atlUser,
-    "password": answers.atlPassword
+
+  if (answers.atlUser === '' && answers.atlPassword === '') {
+    let savedCreds = atlassianCredsLocal.readCreds();
+    config.loginArgs.data = {
+      "username": savedCreds.user,
+      "password": savedCreds.pass,
+    };
+  } else {
+    if (config.default.user && answers.atlUser !== config.default.user) {
+      config.loginArgs.data.username = answers.atlUser;
+      config.loginArgs.data.password = answers.atlPassword;
+    }
+    config.loginArgs.data = {
+      "username": answers.atlUser,
+      "password": answers.atlPassword
+    }
   }
 
   client.post("https://theappraisallane.atlassian.net/rest/auth/1/session", config.loginArgs, function (data, response) {
     if (response.statusCode == 200) { // TODO: Move all of this to a new organized response hanlder function
       saveCookie(data.session, answers.isTalEmployee);
-      reportLogic(answers);
+      reportLogic(answers/* , keyStoredLocally */);
     } else {
       console.error(error(response.statusCode, data.errorMessages));
     }
   });
 }
 
-function getJiraData(search, answers, sheetName, operation) {
+function getJiraData(search, answers, sheetName, operation/* , keyStoredLocally */) {
   client.post("https://theappraisallane.atlassian.net/rest/api/latest/search", search.args, function (searchResult, response) {
     if (response.statusCode === 200) {
       search.type === 'future' ? uploadData = parser.parseFuture(searchResult) : uploadData = parser.parseCurrent(searchResult);
-      operation === 'Update Existing Sheet(s)' ? sheets.updateSheet(uploadData, sheetName, answers.sheetKey, answers.exceptions, answers.keyIndex) : sheets.writeToSheet(uploadData, sheetName, answers.sheetKey);
+      operation === 'Update Existing Sheet(s)' ? sheets.updateSheet(uploadData, sheetName, answers.sheetKey, answers.exceptions, answers.keyIndex/* , keyStoredLocally */) : sheets.writeToSheet(uploadData, sheetName, answers.sheetKey/* , keyStoredLocally */);
     }
   });
 }
 
-function reportLogic(answers) {
+function reportLogic(answers/* , keyStoredLocally */) {
   if (answers.reportType === 'Both') {
-    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation);
-    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation);
+    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation/* , keyStoredLocally */);
+    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation/* , keyStoredLocally */);
   } else if (answers.reportType === 'PlanITPoker') {
-    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation);
+    getJiraData(config.searches.future, answers, answers.sheet2, answers.operation/* , keyStoredLocally */);
   } else {
-    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation);
+    getJiraData(config.searches.current, answers, answers.sheet1, answers.operation/* , keyStoredLocally */);
   }
 }
 
